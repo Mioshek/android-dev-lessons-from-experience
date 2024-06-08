@@ -17,14 +17,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat.requestPermissions
-import com.mioshek.android_dev_lessons_from_experience.ui.theme.AndroiddevlessonsfromexperienceTheme
+import com.mioshek.android_dev_lessons_from_experience.ui.theme.AndroidDevLessonsFromExperienceTheme
 
 
 class Permissions : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AndroiddevlessonsfromexperienceTheme {
+            AndroidDevLessonsFromExperienceTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -67,7 +67,7 @@ fun PermissionCard(permission: CustomPermission){
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    AndroiddevlessonsfromexperienceTheme {
+    AndroidDevLessonsFromExperienceTheme {
         PermissionsScreen()
     }
 }

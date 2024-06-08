@@ -27,12 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import com.mioshek.android_dev_lessons_from_experience.ui.theme.AndroiddevlessonsfromexperienceTheme
+import com.mioshek.android_dev_lessons_from_experience.ui.theme.AndroidDevLessonsFromExperienceTheme
+import java.io.BufferedReader
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStreamReader
 
 enum class CustomOption{
     EXPORT,
@@ -40,11 +41,10 @@ enum class CustomOption{
 }
 
 class FileOpener : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AndroiddevlessonsfromexperienceTheme {
+            AndroidDevLessonsFromExperienceTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -59,12 +59,16 @@ class FileOpener : ComponentActivity() {
     override fun onActivityResult(
         requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
-        if (requestCode == 1
-            && resultCode == Activity.RESULT_OK) {
+        if (requestCode == 1  && resultCode == Activity.RESULT_OK) {
             // The result data contains a URI for the document or directory that
             // the user selected.
             resultData?.data?.also { uri ->
-                insertDataIntoFile(uri, applicationContext, "Hejka")
+                insertDataIntoFile(uri, applicationContext)
+            }
+        }
+        else if (requestCode == 2 && resultCode == Activity.RESULT_OK){
+            resultData?.data?.also { uri ->
+                Log.d("Data",readData(uri, applicationContext))
             }
         }
     }
@@ -89,9 +93,7 @@ fun FileOpenerScreen(modifier: Modifier = Modifier) {
         )
         Button(
             onClick = {
-                val a = Intent(context, FileOpener::class.java).putExtra("Option", CustomOption.EXPORT)
-                a.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                ContextCompat.startActivity(context, a, Bundle())
+                createFile(context)
             }
         ) {
             Text(text = "Export")
@@ -99,9 +101,7 @@ fun FileOpenerScreen(modifier: Modifier = Modifier) {
 
         Button(
             onClick = {
-                val a = Intent(context, FileOpener::class.java).putExtra("Option", CustomOption.IMPORT)
-                a.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                ContextCompat.startActivity(context, a, Bundle())
+                openFile(context)
             }
         ) {
             Text(text = "Import")
@@ -109,17 +109,17 @@ fun FileOpenerScreen(modifier: Modifier = Modifier) {
     }
 }
 
-private fun createFile(context: Context, sbody: String) {
+private fun createFile(context: Context) {
     val activity = context as Activity
     val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-        setDataAndType(Environment.getExternalStorageDirectory().path.toUri(), "text/plain")
+        setDataAndType(Environment.getExternalStorageDirectory().path.toUri(), "application/json")
         addCategory(Intent.CATEGORY_OPENABLE)
-        putExtra(Intent.EXTRA_TITLE, "ExportHabits.txt")
+        putExtra(Intent.EXTRA_TITLE, "ExportHabits.json")
     }
     ActivityCompat.startActivityForResult(activity, intent, 1, null)
 }
 
-private fun insertDataIntoFile(uri: Uri, context: Context, sbody: String){
+private fun insertDataIntoFile(uri: Uri, context: Context){
     try {
         context.contentResolver.openFileDescriptor(uri, "w")?.use {
             FileOutputStream(it.fileDescriptor).use {
@@ -136,15 +136,30 @@ private fun insertDataIntoFile(uri: Uri, context: Context, sbody: String){
     }
 }
 
-private fun openFile(activity: Activity) {
+private fun readData(uri: Uri, context: Context,): String {
+    val contentResolver = context.contentResolver
+    val stringBuilder = StringBuilder()
+    contentResolver.openInputStream(uri)?.use { inputStream ->
+        BufferedReader(InputStreamReader(inputStream)).use { reader ->
+            var line: String? = reader.readLine()
+            while (line != null) {
+                stringBuilder.append(line)
+                line = reader.readLine()
+            }
+        }
+    }
+    return stringBuilder.toString()
+}
+
+private fun openFile(context: Context) {
+    val activity = context as Activity
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
-        type = "application/zip"
+        type = "application/json"
 
         // Optionally, specify a URI for the file that should appear in the
         // system file picker when it loads.
     }
 
     ActivityCompat.startActivityForResult(activity, intent, 2, Bundle())
-    Log.d("Data", intent.extras.toString())
 }
