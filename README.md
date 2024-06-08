@@ -1,4 +1,4 @@
-<h1>List Of Usefull Implementations</h1>
+<h1>List Of Useful Implementations</h1>
 <ul>
     <li>
         <a href="https://github.com/Mioshek/android-dev-lessons-from-experience/blob/main/app/src/main/java/com/mioshek/android_dev_lessons_from_experience/lessons/FileOpener.kt">How to create a file with data inside and open file to read.</a>
